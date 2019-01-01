@@ -1,0 +1,46 @@
+
+public class Chip8 {
+	
+	private byte[] RAM = new byte[4096];
+	private byte[] registers = new byte[16];
+	private short[] stack = new short[16];
+	private long[] display = new long[32];
+	
+	private short PC, I, KEYBOARD;
+	
+	private byte DT, sound, SP;
+	
+	public Chip8() {
+		
+		initSprites();
+		
+	}
+	
+	private void initSprites() {
+		
+		byte[] sprites = new byte[] {
+				(byte) 0xF0, (byte) 0x90, (byte) 0x90, (byte) 0x90, (byte) 0xF0,
+				(byte) 0x20, (byte) 0x60, (byte) 0x20, (byte) 0x20, (byte) 0x70,
+				(byte) 0xF0, (byte) 0x10, (byte) 0xF0, (byte) 0x80, (byte) 0xF0,
+				(byte) 0x90, (byte) 0x10, (byte) 0xF0, (byte) 0x10, (byte) 0xF0,
+				(byte) 0xF0, (byte) 0x90, (byte) 0xF0, (byte) 0x10, (byte) 0x10,
+				(byte) 0xF0, (byte) 0x80, (byte) 0xF0, (byte) 0x10, (byte) 0xF0,
+				(byte) 0xF0, (byte) 0x80, (byte) 0xF0, (byte) 0x90, (byte) 0xF0,
+				(byte) 0xF0, (byte) 0x10, (byte) 0x20, (byte) 0x40, (byte) 0x40,
+				(byte) 0xF0, (byte) 0x90, (byte) 0xF0, (byte) 0x90, (byte) 0xF0,
+				(byte) 0xF0, (byte) 0x90, (byte) 0xF0, (byte) 0x10, (byte) 0xF0,
+				(byte) 0xE0, (byte) 0x90, (byte) 0xE0, (byte) 0x90, (byte) 0xE0,
+				(byte) 0xF0, (byte) 0x80, (byte) 0x80, (byte) 0x80, (byte) 0xF0,
+				(byte) 0xE0, (byte) 0x90, (byte) 0x90, (byte) 0x90, (byte) 0xE0,
+				(byte) 0xF0, (byte) 0x80, (byte) 0xF0, (byte) 0x80, (byte) 0xF0,
+				(byte) 0xF0, (byte) 0x80, (byte) 0xF0, (byte) 0x80, (byte) 0x80,
+		};
+		
+		for(int i = 0; i < sprites.length; i++)RAM[i] = sprites[i];
+		
+	}
+	
+	
+	
+	
+}
