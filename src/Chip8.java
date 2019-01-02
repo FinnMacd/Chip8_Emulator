@@ -1,5 +1,13 @@
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
-public class Chip8 {
+public class Chip8 implements Runnable{
 	
 	private byte[] RAM = new byte[4096];
 	private byte[] registers = new byte[16];
@@ -10,9 +18,44 @@ public class Chip8 {
 	
 	private byte DT, sound, SP;
 	
+	private Thread chipThread;
+	
 	public Chip8() {
 		
 		initSprites();
+		
+		chipThread = new Thread(this);
+		
+		chipThread.start();
+		
+	}
+	
+	public void loadROM(String path) {
+		
+		int i = 512;
+		
+		try {
+			File file = new File("./Pong (alt).ch8");
+			InputStream in = new BufferedInputStream(new FileInputStream(file));
+			
+			byte[] program = new byte[(int)file.length()];
+			
+			int totalBytesRead = 0;
+			
+			while(totalBytesRead < program.length) {
+				int bytesRead = in.read(program, totalBytesRead, program.length - totalBytesRead);
+				
+				if(bytesRead > 0)totalBytesRead += bytesRead;
+				
+			}
+			
+			for(;i<512+file.length();i++) {
+				RAM[i] = program[i-512];
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -40,7 +83,35 @@ public class Chip8 {
 		
 	}
 	
+	public void run() {
+		
+		double NS = 1000.0/60.0;
+		double t = 0, lastTime = System.currentTimeMillis();
+		
+		while(true) {
+			
+			double time = System.currentTimeMillis();
+			
+			t += time-lastTime;
+			
+			while(t>NS) {
+				update();
+				t-=NS;
+			}
+			
+			lastTime = time;
+			
+			
+			
+		}
+		
+		
+	}
 	
+	private void update() {
+		
+		
+	}
 	
 	
 }

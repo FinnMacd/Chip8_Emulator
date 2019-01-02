@@ -3,8 +3,10 @@ public class Main {
 
 	public static void main(String[] args) {
 		
-		new Chip8();
-
+		Chip8 chip = new Chip8();
+		
+		chip.loadROM("./Pong (alt).ch8");
+		
 	}
 
 }
