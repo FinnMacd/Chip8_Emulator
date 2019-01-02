@@ -1,13 +1,16 @@
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 
-public class Chip8 implements Runnable{
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+public class Chip8 extends JPanel implements Runnable{
+	
+	//emulator
 	
 	private byte[] RAM = new byte[4096];
 	private byte[] registers = new byte[16];
@@ -16,18 +19,43 @@ public class Chip8 implements Runnable{
 	
 	private short PC, I, KEYBOARD;
 	
-	private byte DT, sound, SP;
+	private byte DT, ST, SP;
+	
+	//mechanics
 	
 	private Thread chipThread;
 	
-	public Chip8() {
+	boolean graphicsChanged, keyboardChanged;
+	
+	private JFrame frame;
+	private int screenWidth, screenHeight;
+	
+	public Chip8(int width, int height) {
 		
+		setPreferredSize(new Dimension(width, height));
+		requestFocus();
+		
+		screenWidth = width;
+		screenHeight = height;
+		
+		initFrame();
 		initSprites();
 		
 		chipThread = new Thread(this);
 		
-		chipThread.start();
+	}
+	
+	public void start() {
+		PC = 512;
+		I = 0;
+		SP = 0;
+		DT = 0;
+		ST = 0;
+		KEYBOARD = 0;
 		
+		display[1] = 1;
+		
+		chipThread.start();
 	}
 	
 	public void loadROM(String path) {
@@ -83,6 +111,20 @@ public class Chip8 implements Runnable{
 		
 	}
 	
+	private void initFrame() {
+		
+		frame = new JFrame("Chip8 Emulator");
+		
+		frame.setResizable(false);
+		frame.add(this);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.pack();
+		frame.setLocationRelativeTo(null);
+		
+		frame.setVisible(true);
+		
+	}
+	
 	public void run() {
 		
 		double NS = 1000.0/60.0;
@@ -110,6 +152,37 @@ public class Chip8 implements Runnable{
 	
 	private void update() {
 		
+		emulateCycle();
+		
+		if(graphicsChanged)repaint();
+		
+		if(ST != 0)ST--;
+		
+		if(DT != 0)DT--;
+		
+		
+	}
+	
+	private void emulateCycle() {
+		
+		display[0]++;
+		display[1]*=2;
+		graphicsChanged = true;
+		
+	}
+	
+	public void paint(Graphics g) {
+		super.paint(g);
+		
+		for(int i = 0; i < 64; i++) {
+			for(int j = 0; j < 32; j++) {
+				if((display[j] & (long)((long)1<<(63-i))) != 0) {
+					g.fillRect(i*(screenWidth/64), j*(screenHeight/32), screenWidth/64, screenHeight/32);
+				}
+			}
+		}
+		
+		graphicsChanged = false;
 		
 	}
 	
