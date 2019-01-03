@@ -1,5 +1,7 @@
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,7 +12,7 @@ import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class Chip8 extends JPanel implements Runnable{
+public class Chip8 extends JPanel implements Runnable, KeyListener{
 	
 	//emulator
 	
@@ -35,6 +37,8 @@ public class Chip8 extends JPanel implements Runnable{
 	public Chip8(int width, int height) {
 		
 		setPreferredSize(new Dimension(width, height));
+		addKeyListener(this);
+		setFocusable(true);
 		requestFocus();
 		
 		screenWidth = width;
@@ -94,7 +98,7 @@ public class Chip8 extends JPanel implements Runnable{
 				(byte) 0x20, (byte) 0x60, (byte) 0x20, (byte) 0x20, (byte) 0x70,
 				(byte) 0xF0, (byte) 0x10, (byte) 0xF0, (byte) 0x80, (byte) 0xF0,
 				(byte) 0xF0, (byte) 0x10, (byte) 0xF0, (byte) 0x10, (byte) 0xF0,
-				(byte) 0xF0, (byte) 0x90, (byte) 0xF0, (byte) 0x10, (byte) 0x10,
+				(byte) 0x90, (byte) 0x90, (byte) 0xF0, (byte) 0x10, (byte) 0x10,
 				(byte) 0xF0, (byte) 0x80, (byte) 0xF0, (byte) 0x10, (byte) 0xF0,
 				(byte) 0xF0, (byte) 0x80, (byte) 0xF0, (byte) 0x90, (byte) 0xF0,
 				(byte) 0xF0, (byte) 0x10, (byte) 0x20, (byte) 0x40, (byte) 0x40,
@@ -311,10 +315,18 @@ public class Chip8 extends JPanel implements Runnable{
 		case 0xE:
 			if(kk == 0x9E) {
 				//skip if key Vx is pressed
-				if((KEYBOARD & (1<<x)) == 1)PC+=2;
+				if((unsigned(KEYBOARD) & (1<<unsigned(registers[x]))) == 1) {
+					System.out.println("skipped on " + x + " pressed");
+					PC+=2;
+				}
 			}else if(kk == 0xA1) {
 				//skip if key Vx is not pressed
-				if((KEYBOARD & (1<<x)) == 0)PC+=2;
+				if((unsigned(KEYBOARD) & (1<<unsigned(registers[x]))) == 0) {
+					System.out.println("skipped on " + x + " not pressed");
+					PC+=2;
+				}else {
+					System.out.println("not skipped on " + x + " not pressed");
+				}
 			}else {
 				System.err.println("Invalid Opcode: " + opcode);
 				System.exit(1);
@@ -400,6 +412,60 @@ public class Chip8 extends JPanel implements Runnable{
 	private int unsigned(byte a) {
 		if(a<0)return ((int)1<<8) + a;
 		return a;
+	}
+	
+	public void keyPressed(KeyEvent e) {
+		
+		keyboardChanged = true;
+		
+		int key = e.getKeyCode();
+		
+		if(key == KeyEvent.VK_Q && (KEYBOARD & (1<<1)) == 0)KEYBOARD ^= (1<<1);
+		else if(key == KeyEvent.VK_W && (KEYBOARD & (1<<2)) == 0)KEYBOARD ^= (1<<2);
+		else if(key == KeyEvent.VK_E && (KEYBOARD & (1<<3)) == 0)KEYBOARD ^= (1<<3);
+		else if(key == KeyEvent.VK_R && (KEYBOARD & (1<<12)) == 0)KEYBOARD ^= (1<<12);
+		else if(key == KeyEvent.VK_A && (KEYBOARD & (1<<4)) == 0)KEYBOARD ^= (1<<4);
+		else if(key == KeyEvent.VK_S && (KEYBOARD & (1<<5)) == 0)KEYBOARD ^= (1<<5);
+		else if(key == KeyEvent.VK_D && (KEYBOARD & (1<<6)) == 0)KEYBOARD ^= (1<<6);
+		else if(key == KeyEvent.VK_F && (KEYBOARD & (1<<13)) == 0)KEYBOARD ^= (1<<13);
+		else if(key == KeyEvent.VK_Z && (KEYBOARD & (1<<7)) == 0)KEYBOARD ^= (1<<7);
+		else if(key == KeyEvent.VK_X && (KEYBOARD & (1<<8)) == 0)KEYBOARD ^= (1<<8);
+		else if(key == KeyEvent.VK_C && (KEYBOARD & (1<<9)) == 0)KEYBOARD ^= (1<<9);
+		else if(key == KeyEvent.VK_V && (KEYBOARD & (1<<14)) == 0)KEYBOARD ^= (1<<14);
+		else if(key == KeyEvent.VK_T && (KEYBOARD & (1<<10)) == 0)KEYBOARD ^= (1<<10);
+		else if(key == KeyEvent.VK_Y && (KEYBOARD & (1)) == 0)KEYBOARD ^= (1);
+		else if(key == KeyEvent.VK_U && (KEYBOARD & (1<<11)) == 0)KEYBOARD ^= (1<<11);
+		else if(key == KeyEvent.VK_I && (KEYBOARD & (1<<15)) == 0)KEYBOARD ^= (1<<15);
+		else keyboardChanged = false;
+		
+		//System.out.println(KEYBOARD);
+		
+	}
+	
+	public void keyReleased(KeyEvent e) {
+		
+		int key = e.getKeyCode();
+		
+		if(key == KeyEvent.VK_Q)KEYBOARD ^= (1<<1);
+		if(key == KeyEvent.VK_W)KEYBOARD ^= (1<<2);
+		if(key == KeyEvent.VK_E)KEYBOARD ^= (1<<3);
+		if(key == KeyEvent.VK_R)KEYBOARD ^= (1<<12);
+		if(key == KeyEvent.VK_A)KEYBOARD ^= (1<<4);
+		if(key == KeyEvent.VK_S)KEYBOARD ^= (1<<5);
+		if(key == KeyEvent.VK_D)KEYBOARD ^= (1<<6);
+		if(key == KeyEvent.VK_F)KEYBOARD ^= (1<<13);
+		if(key == KeyEvent.VK_Z)KEYBOARD ^= (1<<7);
+		if(key == KeyEvent.VK_X)KEYBOARD ^= (1<<8);
+		if(key == KeyEvent.VK_C)KEYBOARD ^= (1<<9);
+		if(key == KeyEvent.VK_V)KEYBOARD ^= (1<<14);
+		if(key == KeyEvent.VK_T)KEYBOARD ^= (1<<10);
+		if(key == KeyEvent.VK_Y)KEYBOARD ^= (1);
+		if(key == KeyEvent.VK_U)KEYBOARD ^= (1<<11);
+		if(key == KeyEvent.VK_I)KEYBOARD ^= (1<<15);
+		
+	}
+
+	public void keyTyped(KeyEvent e) {
 	}
 	
 }
